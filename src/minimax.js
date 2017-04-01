@@ -113,14 +113,15 @@ var heuristic = function(state, maximizingPlayer){
 	//This is how you can retrieve the minimizing player.
     var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
 
-	//An example.
-    var linesOfLengthTwoForX = state.numLines(2, 'x')
+		var totalLinesMaximizer = (state.numLines(2, maximizingPlayer) * 50) + (state.numLines(3, maximizingPlayer) * 1000);
+		var totalLinesMinimizer = (state.numLines(2, minimizingPlayer) * 50) + (state.numLines(3, minimizingPlayer) * 1000);
+		var value = (totalLinesMaximizer > totalLinesMinimizer) ?
+		(totalLinesMaximizer - (totalLinesMinimizer / 3)) :
+		(totalLinesMinimizer - (totalLinesMaximizer / 3))
 
-    //Your code here.  Don't return random, obviously.
-	return Math.random()
+		return (maximizingPlayer === 'x') ? value : -value;
+
 }
-
-
 
 /*
 The function "minimax" is one you must write.
@@ -146,7 +147,22 @@ var minimax = function(state, depth, maximizingPlayer){
 	var possibleStates = state.nextStates();
 	var currentPlayer = state.nextMovePlayer;
 	//Your code here.
-	return Math.random();
+
+	if ( !depth || !possibleStates.length ) {
+		return heuristic(state, maximizingPlayer);
+	}
+	else {
+		var values;
+
+		var allHeuristics = possibleStates.map(function(possState){
+			return minimax(possState, depth - 1, maximizingPlayer);
+		})
+
+		values = allHeuristics.sort(function(a,b) { return b - a; });
+
+		return (currentPlayer === maximizingPlayer) ? Math.max(...allHeuristics) : Math.min(...allHeuristics);
+	}
+
 }
 
 
